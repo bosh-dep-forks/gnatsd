@@ -43,3 +43,6 @@ pkg
 
 # BOSH
 out/
+
+# Jetbrains
+.idea/
