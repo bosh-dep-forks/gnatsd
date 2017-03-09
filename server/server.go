@@ -597,7 +597,7 @@ func (s *Server) createClient(conn net.Conn) *client {
 		}
 
 		if tls_detected {
-			c.Debugf("Detected TLS connection while peeking, setting 'tlsRequired' to true")
+			c.Debugf("Detected TLS connection while peeking, moving on")
 		} else {
 			c.Debugf("Detected NON TLS connection while peeking, setting 'tlsRequired' to false")
 			tlsRequired = false
