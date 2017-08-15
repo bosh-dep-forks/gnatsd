@@ -31,6 +31,10 @@ func (a *CertificateAuth) Check(c server.ClientAuth) bool {
 			return false
 		}
 
+		if clientName == "" {
+			return false
+		}
+
 		client, ok := a.certificateClients[clientName]
 		if !ok {
 			return false

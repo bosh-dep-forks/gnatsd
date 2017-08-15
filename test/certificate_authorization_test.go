@@ -183,6 +183,147 @@ func TestTLSClientCertificatePermissionsUnauthorized(t *testing.T) {
 	}
 }
 
+func TestTLSClientCertificateCommonNameNoClientName(t *testing.T) {
+	srv, opts := RunServerWithConfig("./configs/tlsverify_cert_authorization.conf")
+	defer srv.Shutdown()
+
+	endpoint := fmt.Sprintf("%s:%d", opts.Host, opts.Port)
+	nurl := fmt.Sprintf("tls://%s:%s@%s/", opts.Username, opts.Password, endpoint)
+
+	// Load client certificate to successfully connect.
+	certFile := "./configs/certs/certificate_authorization/client-id-only.pem"
+	keyFile := "./configs/certs/certificate_authorization/client-id-only.key"
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		t.Fatalf("error parsing X509 certificate/key pair: %v", err)
+	}
+
+	// Load in root CA for server verification
+	rootPEM, err := ioutil.ReadFile("./configs/certs/certificate_authorization/ca.pem")
+	if err != nil || rootPEM == nil {
+		t.Fatalf("failed to read root certificate")
+	}
+	pool := x509.NewCertPool()
+	ok := pool.AppendCertsFromPEM([]byte(rootPEM))
+	if !ok {
+		t.Fatalf("failed to parse root certificate")
+	}
+
+	// Now do more advanced checking, verifying servername and using rootCA.
+	config := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		ServerName:   opts.Host,
+		RootCAs:      pool,
+		MinVersion:   tls.VersionTLS12,
+	}
+
+	nc, err := nats.Connect(nurl, nats.Secure(config))
+
+	if err == nil {
+		nc.Close()
+		t.Fatalf("Expected error, but none received.")
+	}
+
+	expectedErrorMessage := "nats: authorization violation"
+	if !strings.Contains(err.Error(), expectedErrorMessage) {
+		stackFatalf(t, "Expected '%s' to contain '%s'",  err.Error(), expectedErrorMessage)
+	}
+}
+
+func TestTLSClientCertificateNoCommonName(t *testing.T) {
+	srv, opts := RunServerWithConfig("./configs/tlsverify_cert_authorization.conf")
+	defer srv.Shutdown()
+
+	endpoint := fmt.Sprintf("%s:%d", opts.Host, opts.Port)
+	nurl := fmt.Sprintf("tls://%s:%s@%s/", opts.Username, opts.Password, endpoint)
+
+	// Load client certificate to successfully connect.
+	certFile := "./configs/certs/certificate_authorization/client-no-common-name.pem"
+	keyFile := "./configs/certs/certificate_authorization/client-no-common-name.key"
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		t.Fatalf("error parsing X509 certificate/key pair: %v", err)
+	}
+
+	// Load in root CA for server verification
+	rootPEM, err := ioutil.ReadFile("./configs/certs/certificate_authorization/ca.pem")
+	if err != nil || rootPEM == nil {
+		t.Fatalf("failed to read root certificate")
+	}
+	pool := x509.NewCertPool()
+	ok := pool.AppendCertsFromPEM([]byte(rootPEM))
+	if !ok {
+		t.Fatalf("failed to parse root certificate")
+	}
+
+	// Now do more advanced checking, verifying servername and using rootCA.
+	config := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		ServerName:   opts.Host,
+		RootCAs:      pool,
+		MinVersion:   tls.VersionTLS12,
+	}
+
+	nc, err := nats.Connect(nurl, nats.Secure(config))
+
+	if err == nil {
+		nc.Close()
+		t.Fatalf("Expected error, but none received.")
+	}
+
+	expectedErrorMessage := "nats: authorization violation"
+	if !strings.Contains(err.Error(), expectedErrorMessage) {
+		stackFatalf(t, "Expected '%s' to contain '%s'",  err.Error(), expectedErrorMessage)
+	}
+}
+
+func TestTLSClientCertificateNonExistentClient(t *testing.T) {
+	srv, opts := RunServerWithConfig("./configs/tlsverify_cert_authorization.conf")
+	defer srv.Shutdown()
+
+	endpoint := fmt.Sprintf("%s:%d", opts.Host, opts.Port)
+	nurl := fmt.Sprintf("tls://%s:%s@%s/", opts.Username, opts.Password, endpoint)
+
+	// Load client certificate to successfully connect.
+	certFile := "./configs/certs/certificate_authorization/non-existent-client.pem"
+	keyFile := "./configs/certs/certificate_authorization/non-existent-client.key"
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		t.Fatalf("error parsing X509 certificate/key pair: %v", err)
+	}
+
+	// Load in root CA for server verification
+	rootPEM, err := ioutil.ReadFile("./configs/certs/certificate_authorization/ca.pem")
+	if err != nil || rootPEM == nil {
+		t.Fatalf("failed to read root certificate")
+	}
+	pool := x509.NewCertPool()
+	ok := pool.AppendCertsFromPEM([]byte(rootPEM))
+	if !ok {
+		t.Fatalf("failed to parse root certificate")
+	}
+
+	// Now do more advanced checking, verifying servername and using rootCA.
+	config := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		ServerName:   opts.Host,
+		RootCAs:      pool,
+		MinVersion:   tls.VersionTLS12,
+	}
+
+	nc, err := nats.Connect(nurl, nats.Secure(config))
+
+	if err == nil {
+		nc.Close()
+		t.Fatalf("Expected error, but none received.")
+	}
+
+	expectedErrorMessage := "nats: authorization violation"
+	if !strings.Contains(err.Error(), expectedErrorMessage) {
+		stackFatalf(t, "Expected '%s' to contain '%s'",  err.Error(), expectedErrorMessage)
+	}
+}
+
 func TestTLSClientCertificatePermissions(t *testing.T) {
 	srv, opts := RunServerWithConfig("./configs/tlsverify_cert_authorization.conf")
 	defer srv.Shutdown()
