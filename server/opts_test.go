@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"net/url"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -125,6 +126,10 @@ func TestTLSConfigFile(t *testing.T) {
 		t.Fatalf("Could not verify hostname in certificate: %v\n", err)
 	}
 
+	if opts.TLSEnableCertAuthorization {
+		t.Fatal("Flag 'TLSEnableCertificateAuthorization' should be false\n")
+	}
+
 	// Now test adding cipher suites.
 	opts, err = ProcessConfigFile("./configs/tls_ciphers.conf")
 	if err != nil {
@@ -166,6 +171,36 @@ func TestTLSConfigFile(t *testing.T) {
 	opts, err = ProcessConfigFile("./configs/tls_empty_cipher.conf")
 	if err == nil {
 		t.Fatalf("Did not receive an error from empty cipher_suites.")
+	}
+}
+
+func TestTLSConfigCertAuthorizationFile(t *testing.T) {
+	opts, err := ProcessConfigFile("./configs/tls_enable_cert_authorization.conf")
+	if err != nil {
+		t.Fatalf("Received an error reading config file: %v\n", err)
+	}
+
+	if !opts.TLSEnableCertAuthorization {
+		t.Fatal("Flag 'TLSEnableCertificateAuthorization' should be true\n")
+	}
+
+	// Test disable cert authorization feature
+	opts, err = ProcessConfigFile("./configs/tls_disable_cert_authorization.conf")
+	if err != nil {
+		t.Fatalf("Received an error reading config file: %v\n", err)
+	}
+
+	if opts.TLSEnableCertAuthorization {
+		t.Fatal("Flag 'TLSEnableCertificateAuthorization' should be false\n")
+	}
+}
+
+func TestTLSConfigCertAuthorizationIncorrectFile(t *testing.T) {
+	_, err := ProcessConfigFile("./configs/tls_cert_authorization_incompatible.conf")
+
+	expectedError := "TLS 'verify' must be enabled to use 'enable_cert_authorization'"
+	if !strings.Contains(err.Error(), expectedError) {
+		t.Fatalf("An Error should have occurred with message: '%v'\n", expectedError)
 	}
 }
 
@@ -566,5 +601,142 @@ func TestAuthorizationConfig(t *testing.T) {
 	subPerm = susan.Permissions.Subscribe[0]
 	if subPerm != "PUBLIC.>" {
 		t.Fatalf("Expected Susan's subscribe permissions to be 'PUBLIC.>', got %q\n", subPerm)
+	}
+}
+
+func TestAuthorizationConfigCertificateClients(t *testing.T) {
+	opts, err := ProcessConfigFile("./configs/authorization_certificate_clients.conf")
+	if err != nil {
+		t.Fatalf("Received an error reading config file: %v\n", err)
+	}
+	processOptions(opts)
+	lu := len(opts.CertificateClients)
+	if lu != 3 {
+		t.Fatalf("Expected 3 clients, got %d\n", lu)
+	}
+	// Build a map
+	mu := make(map[string]*CertificateClient)
+	for _, c := range opts.CertificateClients {
+		mu[c.ClientName] = c
+	}
+
+	// Alice
+	alice, ok := mu["alice"]
+	if !ok {
+		t.Fatalf("Expected to see user Alice\n")
+	}
+	// Check for permissions details
+	if alice.Permissions == nil {
+		t.Fatalf("Expected Alice's permissions to be non-nil\n")
+	}
+	if alice.Permissions.Publish == nil {
+		t.Fatalf("Expected Alice's publish permissions to be non-nil\n")
+	}
+	if len(alice.Permissions.Publish) != 1 {
+		t.Fatalf("Expected Alice's publish permissions to have 1 element, got %d\n",
+			len(alice.Permissions.Publish))
+	}
+	pubPerm := alice.Permissions.Publish[0]
+	if pubPerm != "*" {
+		t.Fatalf("Expected Alice's publish permissions to be '*', got %q\n", pubPerm)
+	}
+	if alice.Permissions.Subscribe == nil {
+		t.Fatalf("Expected Alice's subscribe permissions to be non-nil\n")
+	}
+	if len(alice.Permissions.Subscribe) != 1 {
+		t.Fatalf("Expected Alice's subscribe permissions to have 1 element, got %d\n",
+			len(alice.Permissions.Subscribe))
+	}
+	subPerm := alice.Permissions.Subscribe[0]
+	if subPerm != ">" {
+		t.Fatalf("Expected Alice's subscribe permissions to be '>', got %q\n", subPerm)
+	}
+
+	// Bob
+	bob, ok := mu["bob"]
+	if !ok {
+		t.Fatalf("Expected to see user Bob\n")
+	}
+	if bob.Permissions == nil {
+		t.Fatalf("Expected Bob's permissions to be non-nil\n")
+	}
+
+	// Susan
+	susan, ok := mu["susan"]
+	if !ok {
+		t.Fatalf("Expected to see user Susan\n")
+	}
+	if susan.Permissions == nil {
+		t.Fatalf("Expected Susan's permissions to be non-nil\n")
+	}
+	// Check susan closely since she inherited the default permissions.
+	if susan.Permissions == nil {
+		t.Fatalf("Expected Susan's permissions to be non-nil\n")
+	}
+	if susan.Permissions.Publish != nil {
+		t.Fatalf("Expected Susan's publish permissions to be nil\n")
+	}
+	if susan.Permissions.Subscribe == nil {
+		t.Fatalf("Expected Susan's subscribe permissions to be non-nil\n")
+	}
+	if len(susan.Permissions.Subscribe) != 1 {
+		t.Fatalf("Expected Susan's subscribe permissions to have 1 element, got %d\n",
+			len(susan.Permissions.Subscribe))
+	}
+	subPerm = susan.Permissions.Subscribe[0]
+	if subPerm != "PUBLIC.>" {
+		t.Fatalf("Expected Susan's subscribe permissions to be 'PUBLIC.>', got %q\n", subPerm)
+	}
+}
+
+func TestAuthorizationConfigCertificateClientsParsingError(t *testing.T) {
+	// Multi Users
+	_, err := ProcessConfigFile("./configs/authorization_certificate_clients_with_users.conf")
+
+	if err == nil {
+		t.Fatalf("Was expecting error, but no error returned")
+	}
+
+	expectedError := "Can not have a users array and client_certificates array at the same time"
+	if !strings.Contains(err.Error(), expectedError) {
+		t.Fatalf("Expected error to contain '%s' but got '%s'\n", expectedError, err.Error())
+	}
+
+	// Single User
+	_, err = ProcessConfigFile("./configs/authorization_certificate_clients_with_user.conf")
+
+	if err == nil {
+		t.Fatalf("Was expecting error, but no error returned")
+	}
+
+	expectedError = "Can not have a single user/pass and client_certificates array at the same time"
+	if !strings.Contains(err.Error(), expectedError) {
+		t.Fatalf("Expected error to contain '%s' but got '%s'\n", expectedError, err.Error())
+	}
+}
+
+func TestAuthorizationConfigCertificateClientsFlagError(t *testing.T) {
+	_, err := ProcessConfigFile("./configs/authorization_certificate_clients_flag_error.conf")
+
+	if err == nil {
+		t.Fatalf("Was expecting error, but no error returned")
+	}
+
+	expectedError := "TLS 'enable_cert_authorization' must be enabled to use 'certificate_clients'"
+	if !strings.Contains(err.Error(), expectedError) {
+		t.Fatalf("Expected error to contain '%s' but got '%s'\n", expectedError, err.Error())
+	}
+}
+
+func TestAuthorizationConfigCertificateClientsFlagErrorNoAuth(t *testing.T) {
+	_, err := ProcessConfigFile("./configs/authorization_certificate_clients_flag_error_no_clients.conf")
+
+	if err == nil {
+		t.Fatalf("Was expecting error, but no error returned")
+	}
+
+	expectedError := "'certificate_clients' must be defined when 'enable_cert_authorization' is true"
+	if !strings.Contains(err.Error(), expectedError) {
+		t.Fatalf("Expected error to contain '%s' but got '%s'\n", expectedError, err.Error())
 	}
 }
