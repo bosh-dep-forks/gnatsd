@@ -104,9 +104,14 @@ func TestNonTLSConnectionsWithMutualTLSServer_AllowLegacyClientsEnabled_Unauthen
 
 	_, expectA := setupConnWithAuth(t, clientA, "unauthorized_user", "unauthorized_pass")
 	expectA(regexp.MustCompile(`\A-ERR 'Authorization Violation'\r\n`))
+
+	clientB := createClientConn(t, "localhost", opts.Port)
+	defer clientB.Close()
+
+	_, expectB := setupConnWithAuth(t, clientB, opts.Username, "incorrect_password")
+	expectB(regexp.MustCompile(`\A-ERR 'Authorization Violation'\r\n`))
 }
 
-// TODO: Disallow empty username for legacy clients
 func TestNonTLSConnectionsWithMutualTLSServer_AllowLegacyClientsEnabled_EmptyUser(t *testing.T) {
 	srv, opts := RunServerWithConfig("./configs/cert_authorization/tlsverify_cert_authorization_legacy_auth_enabled.conf")
 	defer srv.Shutdown()
