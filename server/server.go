@@ -576,7 +576,7 @@ func (s *Server) createClient(conn net.Conn) *client {
 	// Re-Grab lock
 	c.mu.Lock()
 
-	if tlsRequired {
+	if tlsRequired && s.opts.TLSAllowLegacyClients{
 		peekConn := NewPeekableConn(conn)
 
 		hdr, err := peekConn.PeekFirst(7)

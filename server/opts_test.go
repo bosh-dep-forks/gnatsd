@@ -174,36 +174,6 @@ func TestTLSConfigFile(t *testing.T) {
 	}
 }
 
-func TestTLSConfigCertAuthorizationFile(t *testing.T) {
-	opts, err := ProcessConfigFile("./configs/tls_enable_cert_authorization.conf")
-	if err != nil {
-		t.Fatalf("Received an error reading config file: %v\n", err)
-	}
-
-	if !opts.TLSEnableCertAuthorization {
-		t.Fatal("Flag 'TLSEnableCertificateAuthorization' should be true\n")
-	}
-
-	// Test disable cert authorization feature
-	opts, err = ProcessConfigFile("./configs/tls_disable_cert_authorization.conf")
-	if err != nil {
-		t.Fatalf("Received an error reading config file: %v\n", err)
-	}
-
-	if opts.TLSEnableCertAuthorization {
-		t.Fatal("Flag 'TLSEnableCertificateAuthorization' should be false\n")
-	}
-}
-
-func TestTLSConfigCertAuthorizationIncorrectFile(t *testing.T) {
-	_, err := ProcessConfigFile("./configs/tls_cert_authorization_incompatible.conf")
-
-	expectedError := "TLS 'verify' must be enabled to use 'enable_cert_authorization'"
-	if !strings.Contains(err.Error(), expectedError) {
-		t.Fatalf("An Error should have occurred with message: '%v'\n", expectedError)
-	}
-}
-
 func TestMergeOverrides(t *testing.T) {
 	golden := &Options{
 		Host:           "localhost",
@@ -604,8 +574,39 @@ func TestAuthorizationConfig(t *testing.T) {
 	}
 }
 
+// Certificate Authorization
+func TestTLSConfigCertAuthorizationFile(t *testing.T) {
+	opts, err := ProcessConfigFile("./configs/cert_authorization/tls_enable_cert_authorization.conf")
+	if err != nil {
+		t.Fatalf("Received an error reading config file: %v\n", err)
+	}
+
+	if !opts.TLSEnableCertAuthorization {
+		t.Fatal("Flag 'TLSEnableCertificateAuthorization' should be true\n")
+	}
+
+	// Test disable cert authorization feature
+	opts, err = ProcessConfigFile("./configs/cert_authorization/tls_disable_cert_authorization.conf")
+	if err != nil {
+		t.Fatalf("Received an error reading config file: %v\n", err)
+	}
+
+	if opts.TLSEnableCertAuthorization {
+		t.Fatal("Flag 'TLSEnableCertificateAuthorization' should be false\n")
+	}
+}
+
+func TestTLSConfigCertAuthorizationIncorrectFile(t *testing.T) {
+	_, err := ProcessConfigFile("./configs/cert_authorization/tls_cert_authorization_incompatible.conf")
+
+	expectedError := "TLS 'verify' must be enabled to use 'enable_cert_authorization'"
+	if !strings.Contains(err.Error(), expectedError) {
+		t.Fatalf("An Error should have occurred with message: '%v'\n", expectedError)
+	}
+}
+
 func TestAuthorizationConfigCertificateClients(t *testing.T) {
-	opts, err := ProcessConfigFile("./configs/authorization_certificate_clients.conf")
+	opts, err := ProcessConfigFile("./configs/cert_authorization/authorization_certificate_clients.conf")
 	if err != nil {
 		t.Fatalf("Received an error reading config file: %v\n", err)
 	}
@@ -689,34 +690,8 @@ func TestAuthorizationConfigCertificateClients(t *testing.T) {
 	}
 }
 
-func TestAuthorizationConfigCertificateClientsParsingError(t *testing.T) {
-	// Multi Users
-	_, err := ProcessConfigFile("./configs/authorization_certificate_clients_with_users.conf")
-
-	if err == nil {
-		t.Fatalf("Was expecting error, but no error returned")
-	}
-
-	expectedError := "Can not have a users array and client_certificates array at the same time"
-	if !strings.Contains(err.Error(), expectedError) {
-		t.Fatalf("Expected error to contain '%s' but got '%s'\n", expectedError, err.Error())
-	}
-
-	// Single User
-	_, err = ProcessConfigFile("./configs/authorization_certificate_clients_with_user.conf")
-
-	if err == nil {
-		t.Fatalf("Was expecting error, but no error returned")
-	}
-
-	expectedError = "Can not have a single user/pass and client_certificates array at the same time"
-	if !strings.Contains(err.Error(), expectedError) {
-		t.Fatalf("Expected error to contain '%s' but got '%s'\n", expectedError, err.Error())
-	}
-}
-
-func TestAuthorizationConfigCertificateClientsFlagError(t *testing.T) {
-	_, err := ProcessConfigFile("./configs/authorization_certificate_clients_flag_error.conf")
+func TestCertificateClientDefined_CertAuthorizationDisabled(t *testing.T) {
+	_, err := ProcessConfigFile("./configs/cert_authorization/certificate_clients_defined_cert_authorization_disabled.conf")
 
 	if err == nil {
 		t.Fatalf("Was expecting error, but no error returned")
@@ -728,8 +703,42 @@ func TestAuthorizationConfigCertificateClientsFlagError(t *testing.T) {
 	}
 }
 
+func TestCertificateClientDefined_CertAuthorizationEnabled_UsersDefined(t *testing.T) {
+	_, err := ProcessConfigFile("./configs/cert_authorization/certificate_clients_defined_cert_authorization_enabled_users_defined.conf")
+
+	if err == nil {
+		t.Fatalf("Was expecting error, but no error returned")
+	}
+
+	expectedError := "Can not have 'users' and 'client_certificates' defined at the same time"
+	if !strings.Contains(err.Error(), expectedError) {
+		t.Fatalf("Expected error to contain '%s' but got '%s'\n", expectedError, err.Error())
+	}
+}
+
+func TestCertificateClientDefined_CertAuthorizationEnabled_UserDefined(t *testing.T) {
+	_, err := ProcessConfigFile("./configs/cert_authorization/certificate_clients_defined_cert_authorization_enabled_user_defined.conf")
+
+	if err == nil {
+		t.Fatalf("Was expecting error, but no error returned")
+	}
+
+	expectedError := "Can not have 'user' and 'client_certificates' defined at the same time"
+	if !strings.Contains(err.Error(), expectedError) {
+		t.Fatalf("Expected error to contain '%s' but got '%s'\n", expectedError, err.Error())
+	}
+}
+
+func TestCertificateClientDefined_CertAuthorizationEnabled_UserDefined_LegacyModeEnabled(t *testing.T) {
+	_, err := ProcessConfigFile("./configs/cert_authorization/certificate_clients_defined_cert_authorization_enabled_user_defined_legacy_mode_on.conf")
+
+	if err != nil {
+		t.Fatalf("Was NOT expecting error, but an error was returned: %s", err.Error())
+	}
+}
+
 func TestAuthorizationConfigCertificateClientsFlagErrorNoAuth(t *testing.T) {
-	_, err := ProcessConfigFile("./configs/authorization_certificate_clients_flag_error_no_clients.conf")
+	_, err := ProcessConfigFile("./configs/cert_authorization/authorization_certificate_clients_flag_error_no_clients.conf")
 
 	if err == nil {
 		t.Fatalf("Was expecting error, but no error returned")
@@ -738,5 +747,37 @@ func TestAuthorizationConfigCertificateClientsFlagErrorNoAuth(t *testing.T) {
 	expectedError := "'certificate_clients' must be defined when 'enable_cert_authorization' is true"
 	if !strings.Contains(err.Error(), expectedError) {
 		t.Fatalf("Expected error to contain '%s' but got '%s'\n", expectedError, err.Error())
+	}
+}
+
+func TestAllowLegacyClients(t *testing.T) {
+	opts, err := ProcessConfigFile("./configs/cert_authorization/tls_allow_legacy_clients.conf")
+	if err != nil {
+		t.Fatalf("Received an error reading config file: %v\n", err)
+	}
+
+	if opts.TLSAllowLegacyClients == false {
+		stackFatalf(t, "Expected value to be 'true' but received 'false")
+	}
+}
+
+func TestAllowLegacyClientsEnabledAndVerifyCertDisabled(t *testing.T) {
+	_, err := ProcessConfigFile("./configs/cert_authorization/tls_allow_legacy_clients_cert_verification_off.conf")
+
+	if err == nil {
+		t.Fatalf("Was expecting error, but no error returned")
+	}
+
+	expectedError := "TLS 'enable_cert_authorization' must be enabled to use 'allow_legacy_clients'"
+	if !strings.Contains(err.Error(), expectedError) {
+		t.Fatalf("Expected error to contain '%s' but got '%s'\n", expectedError, err.Error())
+	}
+}
+
+func TestAllowLegacyClientsEnabledAndUsersDefined(t *testing.T) {
+	_, err := ProcessConfigFile("./configs/cert_authorization/tls_allow_legacy_clients_users_defined.conf")
+
+	if err != nil {
+		t.Fatalf("Received an error reading config file: %v\n", err)
 	}
 }

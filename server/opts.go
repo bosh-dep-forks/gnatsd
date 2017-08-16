@@ -89,6 +89,7 @@ type Options struct {
 	TLSCaCert                  string               `json:"-"`
 	TLSConfig                  *tls.Config          `json:"-"`
 	TLSEnableCertAuthorization bool                 `json:"-"`
+	TLSAllowLegacyClients      bool                 `json:"-"`
 }
 
 // Configuration file authorization section.
@@ -111,6 +112,7 @@ type TLSConfigOpts struct {
 	CaFile                  string
 	Verify                  bool
 	EnableCertAuthorization bool
+	AllowLegacyClients      bool
 	Timeout                 float64
 	Ciphers                 []uint16
 }
@@ -186,16 +188,7 @@ func ProcessConfigFile(configFile string) (*Options, error) {
 				opts.Users = auth.users
 			}
 
-			if auth.certificateClients != nil {
-				if auth.users != nil {
-					return nil, fmt.Errorf("Can not have a users array and client_certificates array at the same time")
-				}
-
-				if auth.user != "" {
-					return nil, fmt.Errorf("Can not have a single user/pass and client_certificates array at the same time")
-				}
-				opts.CertificateClients = auth.certificateClients
-			}
+			opts.CertificateClients = auth.certificateClients
 		case "http":
 			hp, err := parseListen(v)
 			if err != nil {
@@ -253,7 +246,13 @@ func ProcessConfigFile(configFile string) (*Options, error) {
 			if tc.EnableCertAuthorization && !tc.Verify {
 				return nil, fmt.Errorf("TLS 'verify' must be enabled to use 'enable_cert_authorization'")
 			}
+
+			if tc.AllowLegacyClients && !tc.EnableCertAuthorization {
+				return nil, fmt.Errorf("TLS 'enable_cert_authorization' must be enabled to use 'allow_legacy_clients'")
+			}
+
 			opts.TLSEnableCertAuthorization = tc.EnableCertAuthorization
+			opts.TLSAllowLegacyClients = tc.AllowLegacyClients
 		}
 	}
 
@@ -263,6 +262,14 @@ func ProcessConfigFile(configFile string) (*Options, error) {
 
 	if opts.CertificateClients == nil && opts.TLSEnableCertAuthorization {
 		return nil, fmt.Errorf("'certificate_clients' must be defined when 'enable_cert_authorization' is true")
+	}
+
+	if opts.TLSEnableCertAuthorization && opts.Users != nil {
+		return nil, fmt.Errorf("Can not have 'users' and 'client_certificates' defined at the same time")
+	}
+
+	if opts.TLSEnableCertAuthorization && opts.Username != "" && !opts.TLSAllowLegacyClients {
+		return nil, fmt.Errorf("Can not have 'user' and 'client_certificates' defined at the same time")
 	}
 
 	return opts, nil
@@ -605,6 +612,12 @@ func parseTLS(tlsm map[string]interface{}) (*TLSConfigOpts, error) {
 				return nil, fmt.Errorf("error parsing tls config, expected 'enable_cert_authorization' to be a boolean")
 			}
 			tc.EnableCertAuthorization = enableCertAuthorization
+		case "allow_legacy_clients":
+			allowLegacyClients, ok := mv.(bool)
+			if !ok {
+				return nil, fmt.Errorf("error parsing tls config, expected 'enable_cert_authorization' to be a boolean")
+			}
+			tc.AllowLegacyClients = allowLegacyClients
 		case "verify":
 			verify, ok := mv.(bool)
 			if !ok {

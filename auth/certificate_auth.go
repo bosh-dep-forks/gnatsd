@@ -22,6 +22,10 @@ func NewCertificateAuth(certificateClients []*server.CertificateClient, legacyAu
 
 func (a *CertificateAuth) Check(c server.ClientAuth) bool {
 	if c.IsLegacyBoshClient() {
+		if c.GetOpts().Username == "" {
+			return false
+		}
+
 		return a.legacyAuth.Check(c)
 	} else {
 		clientName, clientID, err := c.GetCertificateClientNameAndID()
