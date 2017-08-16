@@ -250,14 +250,6 @@ func (c *client) adjustPermission(permission string, clientID string) string {
 }
 
 func (c *client) RegisterCertificateClient(certificateClient *CertificateClient, clientID string) {
-	if certificateClient.Permissions == nil {
-		// Reset perms to nil in case client previously had them.
-		c.mu.Lock()
-		c.perms = nil
-		c.mu.Unlock()
-		return
-	}
-
 	// Process Permissions and map into client connection structures.
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -267,6 +259,10 @@ func (c *client) RegisterCertificateClient(certificateClient *CertificateClient,
 	c.perms.sub = NewSublist()
 	c.perms.pub = NewSublist()
 	c.perms.pcache = make(map[string]bool)
+
+	if certificateClient.Permissions == nil {
+		return
+	}
 
 	// Loop over publish permissions
 	for _, pubSubject := range certificateClient.Permissions.Publish {
