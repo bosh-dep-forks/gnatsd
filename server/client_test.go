@@ -750,35 +750,34 @@ func TestTLSCloseClientConnection(t *testing.T) {
 }
 
 func TestGetCertificateClientName(t *testing.T) {
+	// common_name: client_id.client_name
 	clientCertificate := `-----BEGIN CERTIFICATE-----
-MIIDQTCCAimgAwIBAgIRAN2xb3ZM2thFxHdh4sCYbncwDQYJKoZIhvcNAQELBQAw
-JjEMMAoGA1UEBhMDVVNBMRYwFAYDVQQKEw1DbG91ZCBGb3VuZHJ5MB4XDTE3MDgx
-NDIwMTcwMloXDTE4MDgxNDIwMTcwMlowWzEMMAoGA1UEBhMDVVNBMRYwFAYDVQQK
-Ew1DbG91ZCBGb3VuZHJ5MTMwMQYDVQQDEyphZ2VudC44Mzc3OEZCMC0zOTcyLTQ2
-QjYtODQwMC0zNEYxOTIwMzVENTAwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK
-AoIBAQClPlAJvyowA79FjD2nc/AvZj4EzKyBUY+1QBIblOSxr9lS5ZVoPUHtUgBt
-IKRXQshkJ4XEgqzsUm7Smh0r2czgc0z78GRjolTuuZ4f9veDxTA7ulOUc6z+u0Hb
-YKuh7bgsQfrXzIdWK6LbkCzK1KV0nUnH5hzMug+ES4n3iZi+LbWd95bbPK1kI9RI
-H4dJaoL9Uu0R6v5EFHPKfx64JPMC0rpE4Wzug5omi4frduJPlRue4obyELYfqL98
-FUACxlxRwFkn7FfxWvJiLOYNkspebbrGOnm57J7OZ1Jff+wtkrfmnc6FmnOhxaj6
-9ntCEq0pRCKUPomKZPV1A94bD+RpAgMBAAGjNTAzMA4GA1UdDwEB/wQEAwIFoDAT
-BgNVHSUEDDAKBggrBgEFBQcDAjAMBgNVHRMBAf8EAjAAMA0GCSqGSIb3DQEBCwUA
-A4IBAQBnkJRsIKYhWSUrJNqLN4IgBR7txNiutGhIOLzzdDbYJ+U6dsg6tnmCNx/s
-IKe81LgpAZXJM+jD0FYOA68CQMq47gcqWHI0yaONauoSI9YKT+mjzyNwlI4fknCp
-0YQDVFLT1t8KEOhCoiw0qo34IaZRGlDomsgG6OArhPGjkBAykh1UYNngOMLmdMeP
-CcPgjrlOaTKAhuC7XegkSroR/RvN7GqHxRrdEHcnHlWtDPDtneYREAvTfNF5mri5
-374oCbF6ZFHtgQiOYnWQ9dArPbZgk9gSyOX7pYmuaPgzgzU52SaCShrYETlHzU8j
-hXOiF9qEq+q+y3mYtXm5ZDlBibca
+MIIDKzCCAhOgAwIBAgIQXiPhocaHSsF6En2BeVM9ajANBgkqhkiG9w0BAQsFADAm
+MQwwCgYDVQQGEwNVU0ExFjAUBgNVBAoTDUNsb3VkIEZvdW5kcnkwHhcNMTcwODIx
+MjE1MjU2WhcNMTgwODIxMjE1MjU2WjBGMQwwCgYDVQQGEwNVU0ExFjAUBgNVBAoT
+DUNsb3VkIEZvdW5kcnkxHjAcBgNVBAMMFWNsaWVudF9pZC5jbGllbnRfbmFtZTCC
+ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMV44G/6aRe6gI+DqVAIH0S3
+C5TRNYtl/h8HT0EaEnYdcY20MZrusdph7ZdLZ/wHkA++If5mAiP/A1i1uU85Or34
+VIY7vRz//ckKzMd4r5Hyh3Ejqi5YzUElzJvac2As79QbgMrqJKt7KYNU3ER/Om2X
+iPXPsuFHeTyrWOkZxW+jbNptroATrC8cr7h3yTK2dXD+ta9OrzPsnBUbhDVely6L
+QUyNWvPGhQ+Uy3L99kT3AgyIk6kDq6hbHNKAKGA/8yzW6QmCGBsYaifUs93y2Hih
+39AAR7J/Z6lwxLrJprPmBfggUdvinkVLOtKDerqg+QDW7+OlxyMbRLKMytvkQB0C
+AwEAAaM1MDMwDgYDVR0PAQH/BAQDAgWgMBMGA1UdJQQMMAoGCCsGAQUFBwMBMAwG
+A1UdEwEB/wQCMAAwDQYJKoZIhvcNAQELBQADggEBAIO/7waLbZ9cAje18/f5HTp8
+GuLsxZFXyXerOnEzkbSwHBvJ9oEtdLQvgEXo5qfrxP0NrdjjEJsIwDSzstyTpMfW
+Yx8dcQR8bCW2y8cZhYP36XjLL5//nMk15TFcG+f6R4OZQWODVHLdzu29ntgsDyjY
+D1GoJlm63ESZ4we5Y2nsB7gjYSmadtvF+uHO5D0/5tQZByCKqz23Srh2F7+vQj6v
+MRExAXOJTZ6eI+A7ixkD6vCLNeJXrVoigFxbNt6qgpsCHxkoaqkcF6AfBHIuWNd2
+oPwekVPuv6H1Lc1Wq0xUpb6nwxZsqYxtT0p0Lxx81QFfFx3tpH/2SPUtL0JQSbw=
 -----END CERTIFICATE-----`
 
 	cpb, _ := pem.Decode([]byte(clientCertificate))
 	crt, _ := x509.ParseCertificate(cpb.Bytes)
 
-
 	client := client{clientCertificate: crt}
 
-	expectedCertificateClientName := "agent"
-	expectedCertificateClientID := "83778FB0-3972-46B6-8400-34F192035D50"
+	expectedCertificateClientName := "client_name"
+	expectedCertificateClientID := "client_id"
 
 	actualCertificateClientName, actualCertificateClientID, _ := client.GetCertificateClientNameAndID()
 
@@ -846,24 +845,25 @@ IwKkI6wszdjZ9f6pPUbI9w==
 }
 
 func TestGetCertificateClientNameCommonNameNoDots(t *testing.T) {
+	// common_name: client_name
 	clientCertificate := `-----BEGIN CERTIFICATE-----
-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
+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
 -----END CERTIFICATE-----`
 
 	cpb, _ := pem.Decode([]byte(clientCertificate))
@@ -871,40 +871,38 @@ ZPj54+7ig2TFKbIDhXfnqUYhDNTDD1LbleW4b6+Ohc0=
 
 	client := client{clientCertificate: crt}
 
-	expectedCertificateClientName := "agent"
-	expectedCertificateClientID := ""
+	_, _, err := client.GetCertificateClientNameAndID()
 
-	actualCertificateClientName, actualCertificateClientID, _ := client.GetCertificateClientNameAndID()
-
-	if actualCertificateClientName != expectedCertificateClientName {
-		stackFatalf(t, "Expected %s to equal %s", actualCertificateClientName, expectedCertificateClientName)
+	if err == nil {
+		t.Fatalf("Expected error but none received.")
 	}
 
-	if actualCertificateClientID != expectedCertificateClientID {
-		stackFatalf(t, "Expected %s to equal %s", actualCertificateClientID, expectedCertificateClientID)
+	expectedErrorMessage := "Clients must present both NAME and ID. `<client_id>.<client_name>`"
+	if err.Error() != expectedErrorMessage {
+		stackFatalf(t, "Expected %s to equal %s", err.Error(), expectedErrorMessage)
 	}
 }
 
 func TestGetCertificateClientNameCommonNameOneDot(t *testing.T) {
-	// common_name : agent.
+	// common_name : .client_name
 	clientCertificate := `-----BEGIN CERTIFICATE-----
-MIIDHDCCAgSgAwIBAgIQEz0zK5wijp7FaayGsrTMJTANBgkqhkiG9w0BAQsFADAm
-MQwwCgYDVQQGEwNVU0ExFjAUBgNVBAoTDUNsb3VkIEZvdW5kcnkwHhcNMTcwODE0
-MjEzMTM0WhcNMTgwODE0MjEzMTM0WjA3MQwwCgYDVQQGEwNVU0ExFjAUBgNVBAoT
-DUNsb3VkIEZvdW5kcnkxDzANBgNVBAMTBmFnZW50LjCCASIwDQYJKoZIhvcNAQEB
-BQADggEPADCCAQoCggEBALy5UzV1XrDOKLh/vsytQwp1PwY+2NmipfT/RM0SeZnS
-Q7yEJVCj+IueH8ZcjMxdO3sWdWXLBRP/pVS6Hm1uTiy72r7uMiuNvlrVGDTB/9zk
-hyhoXpreIP/BLZtozfEr2unEXFbz7xqb4Fa4uWvdOCgSwdWMel0IXqmQ0GsRk9wE
-Uta33LUnUhaM0DnKUGTEg12cboUPR2f+KT7dHcOLIS/WpLJ41SaJ1LXkshP7K/gr
-UVGWr524ST29/QexbI53Mlua17jE7HpBPqL0YNeIjF3kTSLaJjqBZ5SrJmP7UjdZ
-YQPVFd0v9Lm0h4osr090RKs5HWpJzHXTDx7vR9q+wrMCAwEAAaM1MDMwDgYDVR0P
-AQH/BAQDAgWgMBMGA1UdJQQMMAoGCCsGAQUFBwMCMAwGA1UdEwEB/wQCMAAwDQYJ
-KoZIhvcNAQELBQADggEBADeN7KWwzVe2Nz3Gg/uilA3Q7oBl0cbB2swcfeqKr+nc
-WsqNnAlUtyzSBHu5+Fc5Pkf9Ie/6M76sWHS8cAubtMGG3aYxhyA37Q71tj9Zk6Qx
-IItJY6NAIJnPB4WGY8hwsQos0KOF/f1yy0biwYqXL3Xd2cbvZV90C5iP7JKCyDrr
-WRc7vBZ+xEnaUP7uvJXT6zUj3eg4ZpfxaCCxpSjWjQOTSGn96vR7H2c4IXJWw4Vg
-zuVx86B+lWBpzx9pjXJODTW9elTmn9uBubQLkFtTuHuzzy2W92RsT5ukqDBzkbqz
-DJ5c/ccblLatvbxBQ3EHv9sS/LyLyjlftsd4Q8oJg3w=
+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
 -----END CERTIFICATE-----`
 
 	cpb, _ := pem.Decode([]byte(clientCertificate))
@@ -912,7 +910,7 @@ DJ5c/ccblLatvbxBQ3EHv9sS/LyLyjlftsd4Q8oJg3w=
 
 	client := client{clientCertificate: crt}
 
-	expectedCertificateClientName := "agent"
+	expectedCertificateClientName := "client_name"
 	expectedCertificateClientID := ""
 
 	actualCertificateClientName, actualCertificateClientID, _ := client.GetCertificateClientNameAndID()
@@ -927,25 +925,26 @@ DJ5c/ccblLatvbxBQ3EHv9sS/LyLyjlftsd4Q8oJg3w=
 }
 
 func TestGetCertificateClientNameCommonNameMultiDots(t *testing.T) {
-	// common_name : agent.hello.bye
+	// common_name : client_id.client_name_part1.client_name_part2
 	clientCertificate := `-----BEGIN CERTIFICATE-----
-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
+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
+edEBThwyxIVYZxo3V+r3Pu27RPVDRGE=
 -----END CERTIFICATE-----`
 
 	cpb, _ := pem.Decode([]byte(clientCertificate))
@@ -953,8 +952,8 @@ xB1OnbVy1YO9SuUsexRU1gTj2US7zz7CBHiicZQFQy5fR/ROLNGO636z
 
 	client := client{clientCertificate: crt}
 
-	expectedCertificateClientName := "agent"
-	expectedCertificateClientID := "hello.bye"
+	expectedCertificateClientName := "client_name_part1.client_name_part2"
+	expectedCertificateClientID := "client_id"
 
 	actualCertificateClientName, actualCertificateClientID, _ := client.GetCertificateClientNameAndID()
 
@@ -968,25 +967,25 @@ xB1OnbVy1YO9SuUsexRU1gTj2US7zz7CBHiicZQFQy5fR/ROLNGO636z
 }
 
 func TestGetCertificateClientNameCommonNameMultiConsecutiveDots(t *testing.T) {
-	// common_name : agent...
+	// common_name : ..client_name
 	clientCertificate := `-----BEGIN CERTIFICATE-----
-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
+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
 -----END CERTIFICATE-----`
 
 	cpb, _ := pem.Decode([]byte(clientCertificate))
@@ -994,8 +993,8 @@ Qr6kwPBR4nh2c0nI7+fwwDVhEKk/oTvcQr1q+4kcy+MYytg=
 
 	client := client{clientCertificate: crt}
 
-	expectedCertificateClientName := "agent"
-	expectedCertificateClientID := ".."
+	expectedCertificateClientName := ".client_name"
+	expectedCertificateClientID := ""
 
 	actualCertificateClientName, actualCertificateClientID, _ := client.GetCertificateClientNameAndID()
 

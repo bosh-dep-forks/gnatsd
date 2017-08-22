@@ -221,7 +221,7 @@ func (c *client) IsLegacyBoshClient() bool {
 	return c.isBOSHLegacyClient
 }
 
-func (c *client) GetCertificateClientNameAndID() (string, string, error) {
+func (c *client) GetCertificateClientNameAndID() (clientName string, clientId string, err error) {
 	if c.clientCertificate == nil {
 		return "", "", fmt.Errorf("Client does not have a certificate")
 	}
@@ -232,13 +232,15 @@ func (c *client) GetCertificateClientNameAndID() (string, string, error) {
 	}
 
 	segments := strings.SplitN(commonName, CertificateClientNameDelimiter, 2)
-	clientName := segments[0]
 
 	if len(segments) == 1 {
-		return clientName, "", nil
+		err = fmt.Errorf("Clients must present both NAME and ID. `<client_id>.<client_name>`")
+	} else {
+		clientId = segments[0]
+		clientName = segments[1]
 	}
 
-	return clientName, segments[1], nil
+	return
 }
 
 func (c *client) adjustPermission(permission string, clientID string) string {
