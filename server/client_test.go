@@ -1006,3 +1006,83 @@ iM6qM8mUu4Rac0N0Q2bSH7c9s8Xr9XcBx9ogzOaf+gVkL5PyDjkffw==
 		stackFatalf(t, "Expected %s to equal %s", actualCertificateClientID, expectedCertificateClientID)
 	}
 }
+
+func TestGetCertificateClientNameCommonNameStarWildcard(t *testing.T) {
+	// common_name: client_name
+	clientCertificate := `-----BEGIN CERTIFICATE-----
+MIIDPDCCAiSgAwIBAgIQOy6Dx6eNSZRufttDtxJFPjANBgkqhkiG9w0BAQsFADAm
+MQwwCgYDVQQGEwNVU0ExFjAUBgNVBAoTDUNsb3VkIEZvdW5kcnkwHhcNMTcwODI4
+MjAxMTI3WhcNMTgwODI4MjAxMTI3WjA7MQwwCgYDVQQGEwNVU0ExFjAUBgNVBAoT
+DUNsb3VkIEZvdW5kcnkxEzARBgNVBAMMCiouY2xpZW50XzEwggEiMA0GCSqGSIb3
+DQEBAQUAA4IBDwAwggEKAoIBAQC5WIE2h3qxi25Pu4pzlWXZGKYQtiTNiswzJB+W
+rV0XZu8gVcnGXEclLd2+6JRNmsNLaH8484r2OD7oiNMm1nsXWzSv6KwC7SwXMQcL
+HHKErnTODKBRT1LrgKo1+D3jy1VpHJQrBkbQCXXXhhjSFXusby2h7kvUCWOqQaF1
+sMTUt5k6hiKxpnFCbJzVw21XLOp8m26HbPjGmmd1XuEzukJQWix4rICY1nqtH3Ix
+2VPvWrpARLJM1aGtsjsJDaR/fEezCZydWNdGN7hW8VLjt4PJDIicjdpImG+5Smw7
+0xn5cnWZ7jnzA1Ui7U8km1nobs4mv8TcggGIiV3QPfDEi10XAgMBAAGjUTBPMA4G
+A1UdDwEB/wQEAwIFoDATBgNVHSUEDDAKBggrBgEFBQcDAjAMBgNVHRMBAf8EAjAA
+MBoGA1UdEQQTMBGCCWxvY2FsaG9zdIcEfwAAATANBgkqhkiG9w0BAQsFAAOCAQEA
+kxTh4eRsWgtaI33WjFeWrYq6WHGuq7+V904DCb2gdUjyk5ifCOPMxvO1WVYDCt2p
+oAaInlYChup901FYo+7PmttubGQULAwIumNQCcsF4LlniFNpHO3J4fJhZsELmqzZ
+pbLOmtxxNx7ypN7sxRAV1ldvDWl0hc0/QqTQ8XbIz6VkSqJ25S0wi7XEOF3Fq4nB
+K5NH9Oh7Jb90OZ+WP/7JUbgb9awvG9UO84hHftd4jgEsCKG8wu6l5T324tunQy2B
+gnkZVWCtgcInnXRinVpDFaJJeClmeM/6dQTtsaffD00o6QiETIhprhZ0uQ3kvWd0
+IsLFv1db+9KBiGnTlP+AgQ==
+-----END CERTIFICATE-----`
+
+	cpb, _ := pem.Decode([]byte(clientCertificate))
+	crt, _ := x509.ParseCertificate(cpb.Bytes)
+
+	client := client{clientCertificate: crt}
+
+	_, _, err := client.GetCertificateClientNameAndID()
+
+	if err == nil {
+		t.Fatalf("Expected error but none received.")
+	}
+
+	expectedErrorMessage := "Client ID cannot contain * or >"
+	if err.Error() != expectedErrorMessage {
+		stackFatalf(t, "Expected %s to equal %s", err.Error(), expectedErrorMessage)
+	}
+}
+
+func TestGetCertificateClientNameCommonNameStarGreater(t *testing.T) {
+	// common_name: client_name
+	clientCertificate := `-----BEGIN CERTIFICATE-----
+MIIDPTCCAiWgAwIBAgIRAJ018hXTfrOezk3B4QJ7qrIwDQYJKoZIhvcNAQELBQAw
+JjEMMAoGA1UEBhMDVVNBMRYwFAYDVQQKEw1DbG91ZCBGb3VuZHJ5MB4XDTE3MDgy
+ODIwMTEyN1oXDTE4MDgyODIwMTEyN1owOzEMMAoGA1UEBhMDVVNBMRYwFAYDVQQK
+Ew1DbG91ZCBGb3VuZHJ5MRMwEQYDVQQDDAo+LmNsaWVudF8xMIIBIjANBgkqhkiG
+9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0pE4bDQ641Wvab6jtM4N42KGGVHFl13yaHSW
+BI2gllfwpXqKVojiRmhQ3/DtC9rdDDZ7V0vHDvFbtpnMBzKmX44tZeEMWdRAfCok
+rBHzNaiDoVybfKHHq7rfhpnU1T6Bm3E5JpI79iVnc4Dbiwn7VQ3YE70Rsepjuqkm
+GAVhRhjaK3VpljCXHb2urq9gRcCylpaqZ1b5g4R+EfHXaOiO1Pqo9/4wGM3JWbi6
+IGZmWUO4aaG7VarVlROABC65gepKhO+smq1y9fAVV2BcvSRMCWsotwmQ2TK2+g0E
+JK4aS9HG6wooGU2DN6wthss3GHDJSGe4PlzyC8WJCA5Y555CkQIDAQABo1EwTzAO
+BgNVHQ8BAf8EBAMCBaAwEwYDVR0lBAwwCgYIKwYBBQUHAwIwDAYDVR0TAQH/BAIw
+ADAaBgNVHREEEzARgglsb2NhbGhvc3SHBH8AAAEwDQYJKoZIhvcNAQELBQADggEB
+AFi/R0amrNxkB+1FX7mx42C+WySC+NbK/Xhq7qyldf2PwPbWhW3X7o43FxoVqggA
+Kk9fLoFinsy+Z5z2+E8o2aoHQQgqX8KAFjYQmHFcbdGhr84VukTs8hqaZj8YZjC3
+jwBRvpZzF/VE/FuIgA2PitSLxeuVY1nTmaaJ/blu8dnGsSaCJCdWIq99QTHIv1CT
+tRSiE0+OsAidc+hoDNOJgrNJl3VbdrB4GByRRU4UayOZm3IQ1Pk+OowskRd5aIKe
+lpWSVtt66KEvzw4MTboJYB5+reKld5kXe5iEbheH/Map7WwISI1MwNNn4Wz9ymir
+gjgnkcS+OvcuARm0SxGXeYY=
+-----END CERTIFICATE-----`
+
+	cpb, _ := pem.Decode([]byte(clientCertificate))
+	crt, _ := x509.ParseCertificate(cpb.Bytes)
+
+	client := client{clientCertificate: crt}
+
+	_, _, err := client.GetCertificateClientNameAndID()
+
+	if err == nil {
+		t.Fatalf("Expected error but none received.")
+	}
+
+	expectedErrorMessage := "Client ID cannot contain * or >"
+	if err.Error() != expectedErrorMessage {
+		stackFatalf(t, "Expected %s to equal %s", err.Error(), expectedErrorMessage)
+	}
+}

@@ -34,6 +34,7 @@ const (
 
 const (
 	CertificateClientNameDelimiter = "."
+	CertificateClientIdWildcards = ">*"
 	CertificateClientIDPlaceholder = "_CLIENT_ID"
 )
 
@@ -238,6 +239,11 @@ func (c *client) GetCertificateClientNameAndID() (clientName string, clientId st
 	} else {
 		clientId = segments[0]
 		clientName = segments[1]
+
+		if strings.ContainsAny(clientId, CertificateClientIdWildcards) {
+			err = fmt.Errorf("Client ID cannot contain * or >")
+			return "", "", err
+		}
 	}
 
 	return

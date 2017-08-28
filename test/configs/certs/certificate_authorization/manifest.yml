@@ -11,7 +11,7 @@ variables:
     common_name: default.nats
     alternative_names:
     - localhost
-    - 127.0.0.1
+    - "127.0.0.1"
     extended_key_usage:
     - server_auth
 
@@ -22,7 +22,7 @@ variables:
     common_name: default.client_1
     alternative_names:
     - localhost
-    - 127.0.0.1
+    - "127.0.0.1"
     extended_key_usage:
     - client_auth
 
@@ -32,7 +32,7 @@ variables:
     ca: ca
     alternative_names:
     - localhost
-    - 127.0.0.1
+    - "127.0.0.1"
     extended_key_usage:
     - client_auth
 
@@ -42,7 +42,7 @@ variables:
     ca: ca
     alternative_names:
     - localhost
-    - 127.0.0.1
+    - "127.0.0.1"
     common_name: default
     extended_key_usage:
     - client_auth
@@ -53,7 +53,29 @@ variables:
     ca: ca
     alternative_names:
     - localhost
-    - 127.0.0.1
+    - "127.0.0.1"
     common_name: default.non_existent_client
+    extended_key_usage:
+    - client_auth
+
+- name: wildcard_star_clientid
+  type: certificate
+  options:
+    ca: ca
+    alternative_names:
+    - localhost
+    - "127.0.0.1"
+    common_name: "*.client_1"
+    extended_key_usage:
+    - client_auth
+
+- name: wildcard_greater_client
+  type: certificate
+  options:
+    ca: ca
+    alternative_names:
+    - localhost
+    - "127.0.0.1"
+    common_name: ">.client_1"
     extended_key_usage:
     - client_auth
