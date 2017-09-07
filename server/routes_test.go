@@ -444,9 +444,11 @@ func TestRouteUseIPv6(t *testing.T) {
 	// Regardless, cannot have this test fail simply because IPv6 is disabled
 	// on the host.
 	hp := net.JoinHostPort(opts.Cluster.Host, strconv.Itoa(opts.Cluster.Port))
-	_, err := net.ResolveTCPAddr("tcp", hp)
+	ln, err := net.Listen("tcp", hp)
 	if err != nil {
 		t.Skipf("Skipping this test since there is no IPv6 support on this host: %v", err)
+	} else {
+		ln.Close()
 	}
 
 	s := RunServer(&opts)
