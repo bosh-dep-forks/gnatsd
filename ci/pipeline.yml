@@ -7,7 +7,7 @@ jobs:
         - get: gnatsd
           trigger: true
       - task: test
-        file: bosh-src/ci/pipelines/gnatsd/tasks/test.yml
+        file: gnatsd/ci/tasks/test.yml
         attempts: 3
 
   - name: build
@@ -19,9 +19,9 @@ jobs:
           passed: [ test ]
       - aggregate:
         - task: build-linux
-          file: bosh-src/ci/pipelines/gnatsd/tasks/build-linux.yml
+          file: gnatsd/ci/tasks/build-linux.yml
         - task: build-darwin
-          file: bosh-src/ci/pipelines/gnatsd/tasks/build-darwin.yml
+          file: gnatsd/ci/tasks/build-darwin.yml
 
       - aggregate:
         - {put: release-bucket-linux, params: {file: compiled-linux/gnatsd-*-linux-amd64}}
