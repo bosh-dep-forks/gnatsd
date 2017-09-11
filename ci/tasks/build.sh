@@ -15,7 +15,7 @@ semver=`grep "VERSION =" server/const.go | cut -d\" -f2`
 timestamp=`date -u +"%Y-%m-%dT%H_%M_%SZ"`
 git_rev=`git rev-parse --short HEAD`
 
-version="${semver}+${git_rev}-${timestamp}"
+version="${semver}+${timestamp}-${git_rev}"
 
 filename="gnatsd-${version}-${GOOS}-${GOARCH}"
 
