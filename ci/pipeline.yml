@@ -13,7 +13,7 @@ jobs:
   - name: build
     public: true
     plan:
-      aggregate:
+      - aggregate:
         - get: gnatsd
           trigger: true
           passed: [ test ]
