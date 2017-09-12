@@ -13,10 +13,14 @@ jobs:
   - name: build
     public: true
     plan:
-      - aggregate:
+      aggregate:
         - get: gnatsd
           trigger: true
           passed: [ test ]
+        - get: version
+          params:
+            pre: bosh
+
       - aggregate:
         - task: build-linux
           file: gnatsd/ci/tasks/build-linux.yml
@@ -28,6 +32,15 @@ jobs:
         - {put: release-bucket-darwin, params: {file: compiled-darwin/gnatsd-*-darwin-amd64}}
 
 resources:
+  - name: version
+    type: semver
+    source:
+      initial_version: 0.9.6
+      key: gnatsd-version
+      access_key_id: {{tls_nats_key_id}}
+      secret_access_key: {{tls_nats_access_key}}
+      bucket: {{tls_nats_bucket}}
+
   - name: gnatsd
     type: git
     source:

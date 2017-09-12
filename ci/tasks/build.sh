@@ -7,17 +7,17 @@ export GOPATH=$(pwd)/gopath
 
 base=`pwd`
 
+
 cd gopath/src/github.com/nats-io/gnatsd
 
 out="${base}/compiled-${GOOS}"
 
-semver=`grep "VERSION =" server/const.go | cut -d\" -f2`
-timestamp=`date -u +"%Y-%m-%dT%H_%M_%SZ"`
+semver=$(cat ${base}/version/version)
+timestamp=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
 git_rev=`git rev-parse --short HEAD`
 
-version="${semver}+${timestamp}-${git_rev}"
-
-filename="gnatsd-${version}-${GOOS}-${GOARCH}"
+version="${semver} ${timestamp} ${git_rev}"
+filename="gnatsd-${semver}-${GOOS}-${GOARCH}"
 
 echo "building ${filename} with version ${version}"
 sed -i "s/VERSION = \".*\"/VERSION = \"${version}\"/" server/const.go
