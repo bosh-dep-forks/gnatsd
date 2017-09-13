@@ -576,7 +576,7 @@ func (s *Server) createClient(conn net.Conn) *client {
 	// Re-Grab lock
 	c.mu.Lock()
 
-	if tlsRequired && s.opts.TLSAllowLegacyClients{
+	if tlsRequired && s.opts.TLSAllowLegacyClients {
 		peekConn := NewPeekableConn(conn)
 
 		hdr, err := peekConn.PeekFirst(7)
@@ -654,6 +654,16 @@ func (s *Server) createClient(conn net.Conn) *client {
 
 	if tlsRequired && s.opts.TLSEnableCertAuthorization {
 		cs := c.nc.(*tls.Conn).ConnectionState()
+
+		if len(cs.PeerCertificates) == 0 {
+			c.Debugf("Client certificate error: no client certificates in request")
+			c.sendErr("Client provided no certificates")
+			c.closeConnection()
+			return nil
+		}
+
+		//https://github.com/golang/go/blob/go1.8.3/src/crypto/tls/handshake_server.go#L723:L742
+		//Golang should have already verified the leaf certificate.
 		c.clientCertificate = cs.PeerCertificates[0]
 	}
 
