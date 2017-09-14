@@ -20,7 +20,8 @@ jobs:
         - get: version
           params:
             pre: bosh
-
+      - put: version
+        params: {file: version/version}
       - aggregate:
         - task: build-linux
           file: gnatsd/ci/tasks/build-linux.yml
