@@ -123,6 +123,28 @@ func TestNonTLSConnectionsWithMutualTLSServer_AllowLegacyClientsEnabled_EmptyUse
 	expectA(regexp.MustCompile(`\A-ERR 'Authorization Violation'\r\n`))
 }
 
+func TestNonTLSConnectionsWithMutualTLSServer_AllowLegacyClientsEnabled_EmptyUserConfig_EmptyProvidedUser(t *testing.T) {
+	srv, opts := RunServerWithConfig("./configs/cert_authorization/tlsverify_cert_authorization_legacy_auth_enabled_no_users.conf")
+	defer srv.Shutdown()
+
+	clientA := createClientConn(t, "localhost", opts.Port)
+	defer clientA.Close()
+
+	_, expectA := setupConnWithAuth(t, clientA, "", "")
+	expectA(regexp.MustCompile(`\A-ERR 'Authorization Violation'\r\n`))
+}
+
+func TestNonTLSConnectionsWithMutualTLSServer_AllowLegacyClientsEnabled_EmptyUserConfig_NonEmptyProvidedUser(t *testing.T) {
+	srv, opts := RunServerWithConfig("./configs/cert_authorization/tlsverify_cert_authorization_legacy_auth_enabled_no_users.conf")
+	defer srv.Shutdown()
+
+	clientA := createClientConn(t, "localhost", opts.Port)
+	defer clientA.Close()
+
+	_, expectA := setupConnWithAuth(t, clientA, "test", "test")
+	expectA(regexp.MustCompile(`\A-ERR 'Authorization Violation'\r\n`))
+}
+
 //========================================================================
 //========================================================================
 // TLS Clients
