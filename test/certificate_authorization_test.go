@@ -22,7 +22,7 @@ func TestNonTLSConnectionsWithMutualTLSServer(t *testing.T) {
 	clientA := createClientConn(t, "localhost", opts.Port)
 	defer clientA.Close()
 
-	sendA, expectA := setupConnWithAuth(t, clientA, opts.Username, opts.Password)
+	sendA, expectA := setupNonVerboseConnWithAuth(t, clientA, opts.Username, opts.Password)
 	sendA("SUB foo 22\r\n")
 	sendA("PING\r\n")
 	expectA(pongRe)
@@ -34,7 +34,7 @@ func TestNonTLSConnectionsWithMutualTLSServer(t *testing.T) {
 	clientB := createClientConn(t, "localhost", opts.Port)
 	defer clientB.Close()
 
-	sendB, expectB := setupConnWithAuth(t, clientB, opts.Username, opts.Password)
+	sendB, expectB := setupNonVerboseConnWithAuth(t, clientB, opts.Username, opts.Password)
 	sendB("PUB foo 2\r\nok\r\n")
 	sendB("PING\r\n")
 	expectB(pongRe)
@@ -73,7 +73,7 @@ func TestNonTLSConnectionsWithMutualTLSServer_AllowLegacyClientsEnabled(t *testi
 
 	clientA := createClientConn(t, "localhost", 4222)
 
-	sendA, expectA := setupConnWithAuth(t, clientA, opts.Username, opts.Password)
+	sendA, expectA := setupNonVerboseConnWithAuth(t, clientA, opts.Username, opts.Password)
 	sendA("SUB foo 22\r\n")
 	sendA("PING\r\n")
 	expectA(pongRe)
@@ -84,7 +84,7 @@ func TestNonTLSConnectionsWithMutualTLSServer_AllowLegacyClientsEnabled(t *testi
 
 	clientB := createClientConn(t, "localhost", 4222)
 
-	sendB, expectB := setupConnWithAuth(t, clientB, opts.Username, opts.Password)
+	sendB, expectB := setupNonVerboseConnWithAuth(t, clientB, opts.Username, opts.Password)
 	sendB("PUB foo 2\r\nok\r\n")
 	sendB("PING\r\n")
 	expectB(pongRe)

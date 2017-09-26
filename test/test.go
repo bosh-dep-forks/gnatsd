@@ -242,6 +242,11 @@ func setupConnWithAuth(t tLogger, c net.Conn, user, pass string) (sendFun, expec
 	return sendCommand(t, c), expectCommand(t, c)
 }
 
+func setupNonVerboseConnWithAuth(t tLogger, c net.Conn, user, pass string) (sendFun, expectFun) {
+	doConnectWithAuth(t, c, user, pass, false, false, false)
+	return sendCommand(t, c), expectCommand(t, c)
+}
+
 func setupConnWithProto(t tLogger, c net.Conn, proto int) (sendFun, expectFun) {
 	checkInfoMsg(t, c)
 	cs := fmt.Sprintf("CONNECT {\"verbose\":%v,\"pedantic\":%v,\"ssl_required\":%v,\"protocol\":%d}\r\n", false, false, false, proto)
