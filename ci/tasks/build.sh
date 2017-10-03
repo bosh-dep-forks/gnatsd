@@ -23,3 +23,5 @@ echo "building ${filename} with version ${version}"
 sed -i "s/VERSION = \".*\"/VERSION = \"${version}\"/" server/const.go
 
 go build -o ${out}/${filename} github.com/nats-io/gnatsd
+
+shasum -a 256 ${out}/${filename}
