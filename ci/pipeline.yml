@@ -35,11 +35,11 @@ resources:
   - name: version
     type: semver
     source:
-      initial_version: 0.9.6
+      initial_version: 0.9.6-bosh.10
       key: gnatsd-version
-      access_key_id: {{tls_nats_key_id}}
-      secret_access_key: {{tls_nats_access_key}}
-      bucket: {{tls_nats_bucket}}
+      access_key_id: {{bosh_gnatsd_bucket_access_key_id}}
+      secret_access_key: {{bosh_gnatsd_bucket_secret_key}}
+      bucket: {{bosh_gnatsd_bucket}}
 
   - name: gnatsd
     type: git
@@ -51,14 +51,14 @@ resources:
     type: s3
     source:
       regexp: gnatsd-(.*)-linux-amd64
-      access_key_id: {{tls_nats_key_id}}
-      secret_access_key: {{tls_nats_access_key}}
-      bucket: {{tls_nats_bucket}}
+      access_key_id: {{bosh_gnatsd_bucket_access_key_id}}
+      secret_access_key: {{bosh_gnatsd_bucket_secret_key}}
+      bucket: {{bosh_gnatsd_bucket}}
 
   - name: release-bucket-darwin
     type: s3
     source:
       regexp: gnatsd-(.*)-darwin-amd64
-      access_key_id: {{tls_nats_key_id}}
-      secret_access_key: {{tls_nats_access_key}}
-      bucket: {{tls_nats_bucket}}
+      access_key_id: {{bosh_gnatsd_bucket_access_key_id}}
+      secret_access_key: {{bosh_gnatsd_bucket_secret_key}}
+      bucket: {{bosh_gnatsd_bucket}}

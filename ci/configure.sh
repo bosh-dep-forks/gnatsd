@@ -3,4 +3,4 @@
 exec fly -t production set-pipeline \
   -p gnatsd \
   -c ./pipeline.yml \
-  --load-vars-from <(lpass show --note "bosh nats tls concourse secrets")
+  --load-vars-from <(lpass show --note "bosh gnatsd concourse secrets")
