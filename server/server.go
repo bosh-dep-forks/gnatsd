@@ -423,6 +423,10 @@ func (s *Server) AcceptLoop(clr chan struct{}) {
 		}
 		tmpDelay = ACCEPT_MIN_SLEEP
 		s.startGoRoutine(func() {
+			if tcpConn, ok := conn.(*net.TCPConn); ok {
+				tcpConn.SetKeepAlive(true)
+			}
+
 			s.createClient(conn)
 			s.grWG.Done()
 		})
