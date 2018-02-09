@@ -44,7 +44,7 @@ resources:
   - name: gnatsd
     type: git
     source:
-      uri: https://github.com/cloudfoundry/gnatsd.git
+      uri: https://github.com/bosh-dep-forks/gnatsd.git
       branch: bosh-gnatsd
 
   - name: release-bucket-linux
