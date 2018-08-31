@@ -79,3 +79,51 @@ variables:
     common_name: ">.client_1"
     extended_key_usage:
     - client_auth
+
+- name: valid_client_name_client_id
+  type: certificate
+  options:
+    ca: ca
+    common_name: client_id.client_name
+    extended_key_usage:
+    - client_auth
+
+- name: invalid_client_no_common_name
+  type: certificate
+  options:
+    ca: ca
+    common_name: ""
+    extended_key_usage:
+    - client_auth
+
+- name: invalid_client_name_no_dots
+  type: certificate
+  options:
+    ca: ca
+    common_name: client_name
+    extended_key_usage:
+    - client_auth
+
+- name: client_name_one_dot
+  type: certificate
+  options:
+    ca: ca
+    common_name: .client_name
+    extended_key_usage:
+    - client_auth
+
+- name: client_name_multi_dots
+  type: certificate
+  options:
+    ca: ca
+    common_name: client_id.client_name_part1.client_name_part2
+    extended_key_usage:
+    - client_auth
+
+- name: client_name_multi_consecutive_dots
+  type: certificate
+  options:
+    ca: ca
+    common_name: ..client_name
+    extended_key_usage:
+    - client_auth
